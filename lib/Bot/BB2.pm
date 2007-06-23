@@ -606,10 +606,6 @@ sub load_plugins
 
 	local %INC = %INC; #Ensure that if plugins are reloaded, they reload dependent modules.
 
-	unless (-d 'heaps') {
-		mkdir 'heaps' or die "Couldn't make 'heaps' directory: $!";
-	}
-
 	for( glob"heaps/*.db" ) { unlink $_ }
 
 	for my $plugin (@plugins) 
@@ -724,6 +720,7 @@ sub is_permitted
 	my( $self, $said, $command ) = @_;
 	my $irc = $self->map_to_irc_obj( $said->{poco_irc} );
 	my $opts = $self->command_conf( $said, $command );
+	my $root = $self->map_to_irc_conf($said->{poco_irc})->{root_mask};
 
 	my $perm = 1;
 
@@ -733,12 +730,12 @@ sub is_permitted
 
 		if( $level eq 'root' )
 		{
-			$perm = 0 unless $said->{fullnick} =~ m[buu\@71.6.194.243];
+			$perm = 0 unless $said->{fullnick} =~ $root;
 		}
 
 		elsif( $level eq 'op' )
 		{
-			$perm = 0 unless $said->{fullnick} =~ m[buu\@71.6.194.243]
+			$perm = 0 unless $said->{fullnick} =~ $root
 				or $irc->is_channel_operator( $said->{channel}, $said->{nick} );
 		}
 	}

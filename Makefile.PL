@@ -7,7 +7,7 @@ author 'BUU';
 abstract 'ALL ABOARD THE BUUTRAIN';
 
 license 'perl';
-version '0.01';
+version '0.02';
 
 # logger.conf
 requires 'Log::Dispatch' => 0;
