@@ -1,0 +1,48 @@
+--- 
+abstract: ALL ABOARD THE BUUTRAIN
+author: BUU
+build_requires: 
+  Test::More: 0
+distribution_type: module
+generated_by: Module::Install version 0.65
+license: perl
+meta-spec: 
+  url: http://module-build.sourceforge.net/META-spec-v1.3.html
+  version: 1.3
+name: Bot-BB2
+no_index: 
+  directory: 
+    - inc
+    - t
+recommends: 
+  Data::Dumper: 0
+  Finance::Quote: 0
+  Jplugin: 0
+  Lingua::ManagementSpeak: 0
+  Net::Dict: 0
+  POE::Session: 0
+  POE::Wheel::Run: 0
+  Storable: 0
+  WWW::Mechanize: 0
+requires: 
+  BSD::Resource: 0
+  Config::General: 0
+  DB_File: 0
+  Data::Dumper: 0
+  IPC::Shareable: 0
+  Log::Dispatch: 0
+  Log::Log4perl: 0
+  POE: 0
+  POE::Component::IRC::Plugin::Connector: 0
+  POE::Component::IRC::State: 0
+  POE::Filter::Reference: 0
+  POE::Session: 0
+  POE::Wheel::Run: 0
+  Scalar::Util: 0
+  Symbol: 0
+  Text::ParseWords: 0
+  Text::Wrap: 0
+  Time::HiRes: 0
+  strict: 0
+tests: t/*.t
+version: 0.01

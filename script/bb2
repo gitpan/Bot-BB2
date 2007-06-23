@@ -1,0 +1,160 @@
+#!/usr/bin/perl
+use strict;
+
+use lib '../lib'; 
+use lib 'lib';
+use lib 'deps';
+
+use Pod::Usage ();
+use Getopt::Long ();
+use Bot::BB2::ConfigParser ();
+
+#
+# Get our options
+#
+
+Getopt::Long::Parser->new(
+    config => [ qw< bundling no_ignore_case no_require_order > ],
+)->getoptions(
+    'h|help' => \my $help,
+    'v|version' => \my $version,
+
+    #'c|config-dir=s' => \my $config,
+    'init' => \my $init,
+) or help();
+
+#
+# Deal with --help, --version and incorrect usage
+#
+
+help( verbose => 1, exitval => 0 )
+    if $help;
+
+# Display version if requested
+version( exitval => 0 )
+    if $version;
+
+# The config files bb2 needs to live
+my @conf = qw(bb2.conf logger.conf plugin.conf);
+my $configured = sub {
+    my $ret = 1;
+    eval { -e $_ or $ret = 0 for @conf };
+    $ret;
+};
+
+#
+# Init config
+#
+
+if ($init) {
+    if ($configured->()) {
+        die "One of @conf exists in the current directory already, abording --init";
+    }
+
+    require Bot::BB2;
+    require File::Copy;
+    require File::Spec::Functions;
+
+    my $self = {}; # fake
+    my (@template) = Bot::BB2::pm_files($self, 'conf', '.conf');
+
+    # Copy template config files
+    for (@template) {
+        File::Copy::copy($_ => '.') or die $!;
+    }
+
+    # Make directories
+    mkdir $_ or die $! for qw(heaps jail);
+
+    unless ($configured->()) {
+        die "panic: failed to set up @conf during --init";
+    }
+
+    print "bb2 initialized, now customize your config files and run bb2 again\n";
+    exit 0;
+}
+
+#
+# Make sure we have the required config files
+#
+
+unless ($configured->()) {
+    die "One of @conf is missing in the current directory, abording";
+}
+
+#
+# Start the bot
+#
+
+Bot::BB2::ConfigParser->parse_and_create( 'bb2.conf' );
+
+#
+# Utility functions
+#
+
+sub help
+{
+    my %arg = @_;
+
+    Pod::Usage::pod2usage(
+        -verbose => $arg{ verbose },
+        -exitval => $arg{ exitval } || 0,
+    );
+}
+
+sub version
+{
+    my %arg = @_;
+    require Bot::BB2;
+    print "bb2 $Bot::BB2::VERSION\n";
+    exit $arg{ exitval } || 0;
+}
+
+__END__
+
+=head1 NAME
+
+bb2 - L<Bot::BB2> CLI interface
+
+=head1 SYNOPSIS
+
+    bb2 [OPTIONS]
+
+=head1 OPTIONS
+
+=over
+
+
+
+=item --init
+
+Pull default configuration files into the current directory so that it
+can be used as a bb2 config directory:
+
+    bb2 --init
+    [edit config files]
+    bb2 # start the bot
+
+=item -h, --help
+
+Print a usage message listing all available options
+
+=item -v, --version
+
+Print the version number, then exit successfully.
+
+=back
+
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
+#TODO: make everything deal with the config dir not being CWD
+#=item -c, --config
+#
+#The configuration directory to use where bb2 will search for
+#F<bb2.conf>, F<plugins.conf> and other configuration files, these can
+#be created with the --init option.

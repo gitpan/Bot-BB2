@@ -1,0 +1,107 @@
+--- SpiderMonkey.xs	2006-06-13 10:35:16.000000000 -0500
++++ SpiderMonkey.xs.new	2006-07-01 19:57:18.000000000 -0500
+@@ -29,6 +29,60 @@
+ 
+ static int Debug = 0;
+ 
++/* --------------------------------------------------------------------- */
++int obj_to_str(
++    JSContext *cx, 
++    JSObject *obj,
++		SV        *perl_str
++/* --------------------------------------------------------------------- */
++) {
++	JSIdArray *fields = JS_Enumerate( cx, obj );
++	int i = 0;
++	jsval property;
++
++	sv_catpvn( perl_str, "{ ", 2 );
++/*printf("OBJ_TO_STR\n");
++printf("Length: %i\n", fields->length);*/
++	
++	for( i = 0; i < fields->length; i++ )
++	{
++		jsid id = fields->vector[i];
++		jsval id_val;
++		char *prop_name;
++
++		JS_IdToValue( cx, id, &id_val );
++		prop_name = JS_GetStringBytes(JS_ValueToString(cx, id_val));
++		JS_GetProperty( cx, obj, prop_name, &property );
++
++/*	printf("Adding %s to pv\n", prop_name); */
++		sv_catpvn( perl_str, prop_name, strlen( prop_name ) );
++		sv_catpvn( perl_str, ": ", 2 );
++/*	printf( "Str: %s\n", SvPVbyte_nolen( perl_str ) ); */
++
++		if( JSVAL_IS_OBJECT( property ) )
++		{
++			JSObject *prop_obj;
++			JS_ValueToObject( cx, property, &prop_obj );
++			obj_to_str( cx, prop_obj, perl_str );
++		}
++		else
++		{
++				JSString *prop_str = JS_ValueToString( cx, property );
++				sv_catpvn( perl_str, JS_GetStringBytes( prop_str ), JS_GetStringLength( prop_str ) );
++				/*sv_catpvn( perl_str, " ", 1 );*/
++		}
++
++		if( i < ( fields->length - 1 ) )
++		{
++			sv_catpvn( perl_str, ", ", 2 );
++		}
++	}
++	
++	sv_catpvn( perl_str, "}", 1 );
++	JS_DestroyIdArray( cx, fields );
++	return 1;
++}
++
+ /* It's kinda silly that we have to replicate this for getters and setters,
+  * but there doesn't seem to be a way to distinguish between getters
+  * and setters if we use the same function. (Somewhere I read in a 
+@@ -381,7 +435,7 @@
+     RETVAL
+ 
+ ######################################################################
+-int
++char*
+ JS_EvaluateScript(cx, gobj, script, length, filename, lineno)
+     JSContext  * cx
+     JSObject   * gobj
+@@ -395,6 +449,8 @@
+     uintN ln;
+     int    rc;
+     jsval  jsval;
++		char *return_string;
++		JSString *js_string;
+     INIT:
+     len = (uintN) length;
+     ln  = (uintN) lineno;
+@@ -404,8 +460,23 @@
+                                ln, &jsval);
+         if(!rc) {
+             XSRETURN_UNDEF;
+-        }
+-        RETVAL = rc;
++       	}
++
++				if( JSVAL_IS_OBJECT(jsval) )
++				{
++					SV* sv = NEWSV(5,10);
++					JSObject *obj;
++					JS_ValueToObject( cx, jsval, &obj );
++					obj_to_str(cx,obj,sv);
++					RETVAL = SvPVbyte_nolen( sv );
++				}
++
++				else
++				{
++					js_string = JS_ValueToString(cx, jsval);
++					return_string = JS_GetStringBytes(js_string);
++  	      RETVAL = return_string;
++				}
+     }
+     OUTPUT:
+     RETVAL

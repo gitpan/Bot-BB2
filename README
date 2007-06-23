@@ -1,0 +1,3 @@
+Blah blah.
+
+Note 1: Buubot is designed to run as root. This is only required to make the 'eval' type commands even more secure. It specifically allows the child processes running the untrusted code to be A) chrooted and B) dropped to the 'nobody' uid. This prevents, among other things, the children from sending signals to the parent, with predictable fatal results. 

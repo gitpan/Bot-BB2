@@ -1,0 +1,12 @@
+^\.#
+Makefile$
+Makefile\.old$
+^MANIFEST\.bak$
+^bible\.storable$
+^[^/]+[_.]db$
+^blib/
+^.*\/blib\/
+\.exists$
+pm_to_blib$
+^Bot-BB2-\d+\.\d+
+^heaps\/
