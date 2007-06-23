@@ -7,7 +7,9 @@ author 'BUU';
 abstract 'ALL ABOARD THE BUUTRAIN';
 
 license 'perl';
-version '0.02';
+version '0.03';
+
+no_index directory => $_ for qw(deps ext plugins daemons);
 
 # logger.conf
 requires 'Log::Dispatch' => 0;

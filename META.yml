@@ -12,6 +12,10 @@ meta-spec:
 name: Bot-BB2
 no_index: 
   directory: 
+    - deps
+    - ext
+    - plugins
+    - daemons
     - inc
     - t
 recommends: 
@@ -45,4 +49,4 @@ requires:
   Time::HiRes: 0
   strict: 0
 tests: t/*.t
-version: 0.02
+version: 0.03

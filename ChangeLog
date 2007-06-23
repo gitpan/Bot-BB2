@@ -1,3 +1,8 @@
+2007-06-23  Ævar Arnfjörð Bjarmason  <avar@cpan.org> (0.03)
+
+	* Makefile.PL: Tell CPAN not to index the deps, ext, plugins and
+	               daemons directories
+
 2007-06-23  Ævar Arnfjörð Bjarmason  <avar@cpan.org> (0.02)
 
 	* Support root_mask in bb2.conf instead of hardcoding buu's hostname
