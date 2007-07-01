@@ -43,7 +43,7 @@ my @BOTLIST;
 
 sub new
 {
-    init_logger();
+	init_logger();
 	my $class = shift;
 	my( $confs, $plugins ) = @_;
 
@@ -63,6 +63,7 @@ sub new
 			nick    => $nick,
 			server  => $server,
 			ircname => $username || $nick,
+			username => $username || $nick,
 			port    => $port,
 		);
 		
@@ -151,6 +152,16 @@ sub irc_001
 
 	$self->{connected} = 1;
 
+	#Heh, be sure to register before we attempt to join channels
+	#TODO factor out somehow
+	my $conf = $self->map_to_irc_opts( $sender->ID );
+	if( $conf->{server} =~ /freenode.org/ and -e "freenodenickservpass" )
+	{
+		open my $fh, "freenodenickservpass" or warn "Failed to open freenodenickservpass: $!\n";
+		my $pass = <$fh>;
+		$_[KERNEL]->post( $sender->ID, privmsg => 'nickserv', "identify $pass" );
+	}
+
 	if( @{ $self->{join_queue}->{$sender->ID} } )
 	{
 		for( @{ $self->{join_queue}->{$sender->ID} } )
@@ -159,6 +170,7 @@ sub irc_001
 			$_[KERNEL]->post( $sender->ID, join => $_ );
 		}
 	}
+
 }
 
 sub irc_public
@@ -358,7 +370,7 @@ sub safe_execute
 	my( $code ) = @_;
 
 	opendir my $dh, "/proc/self/fd" or die $!;
-	while(my $fd = readdir($dh)) { next unless $dh > 2; POSIX::close($dh) }
+	while(my $fd = readdir($dh)) { next unless $fd > 2; POSIX::close($fd) }
 
 	my $nobody_uid = getpwnam("nobody");
 	die "Error, can't find a uid for 'nobody'. Replace with someone who exists" unless $nobody_uid;
@@ -378,17 +390,18 @@ sub safe_execute
 	
 	my $kilo = 1024;
 	my $meg = $kilo * $kilo;
+	my $limit = 50 * $meg;
 
 	setrlimit(RLIMIT_CPU, 10,10);
-	setrlimit(RLIMIT_DATA, 40*$meg, 40*$meg );
-	setrlimit(RLIMIT_STACK, 40*$meg, 40*$meg );
+	setrlimit(RLIMIT_DATA, $limit, $limit );
+	setrlimit(RLIMIT_STACK, $limit, $limit );
 	setrlimit(RLIMIT_NPROC, 1,1);
 	setrlimit(RLIMIT_NOFILE, 0,0);
 	setrlimit(RLIMIT_OFILE, 0,0);
 	setrlimit(RLIMIT_OPEN_MAX,0,0);
 	setrlimit(RLIMIT_LOCKS, 0,0);
-	setrlimit(RLIMIT_AS,40*$meg,40*$meg);
-	setrlimit(RLIMIT_VMEM,40*$meg, 40*$meg);
+	setrlimit(RLIMIT_AS,$limit,$limit);
+	setrlimit(RLIMIT_VMEM,$limit, $limit);
 	setrlimit(RLIMIT_MEMLOCK,100,100);
 	#setrlimit(RLIMIT_MSGQUEUE,100,100);
 
@@ -540,11 +553,11 @@ sub _launch_bb2_daemon_service
 					{
 						my $wheel = $self->{ daemon_wheels }->{ $_->{id} };
 						next unless $wheel;
-						$logger->debug( "Found wheel $_->{id} to dispatch to" );
-
-						$logger->debug( "Event: $event" );
-						$logger->debug( "Args: [@args]" );
-						$logger->debug( "Said: ", Dumper $said );
+#            $logger->debug( "Found wheel $_->{id} to dispatch to" );
+#
+#            $logger->debug( "Event: $event" );
+#            $logger->debug( "Args: [@args]" );
+#            $logger->debug( "Said: ", Dumper $said );
 						my $rec = { type => 'event', event => $event, said => $said, args => \@args };
 
 						$wheel->put( [$rec] );
@@ -936,6 +949,8 @@ sub handle_commandline
 	$logger->info( "handle_commandline" );
 
 	my $output = $self->command_line_execute( $said, $commands, $incoming_piped_input );
+	substr( $output->{stdout}, 350 ) = '' if length $output->{stdout} > 350;
+	substr( $output->{stderr}, 350 ) = '' if length $output->{stderr} > 350;
 
 	my $filter = POE::Filter::Reference->new;
 	warn "Trying to output the frozen output, as it were\n";
@@ -1035,6 +1050,7 @@ sub _map_to_irc_store
 		return $self->_map_to_irc_store( $poco_irc->session_id );
 	}
 
+	#If poco_irc is a SESSION->ID
 	elsif( exists $self->{irc_objs}->{$poco_irc} )
 	{
 		return $self->{irc_objs}->{$poco_irc};
@@ -1081,6 +1097,14 @@ sub part_channels
 	$poco_irc->yield( part => $_ ) for @channels;
 }
 
+sub change_topic
+{
+	my( $self, $poco_irc, $channel, $topic ) = @_;
+	$poco_irc = $self->map_to_irc_obj( $poco_irc );
+
+	$poco_irc->yield( topic => $channel => $topic );
+}
+
 sub ignore
 {
 	my( $self, $nick ) = @_;
@@ -1095,12 +1119,13 @@ sub say
 	my $target = $message->{channel} eq 'privmsg' ? $message->{nick} : $message->{channel};
 	my $irc = $self->map_to_irc_obj( $message->{poco_irc} );
 	
-	local $Text::Wrap::columns = 250;
+	local $Text::Wrap::columns = 350;
+		$Text::Wrap::columns += length $message->{nick} if $message->{nick};
 	local $Text::Wrap::unexpand = 0;
 	my $lines = wrap("","", $body);
 
 	for( split /\n/, $lines )
-	{
+	 {
 		if( $target ne 'privmsg' and $message->{nick} )
 		{
 			$_ = "$message->{nick}: $_";

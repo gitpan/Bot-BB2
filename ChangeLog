@@ -1,3 +1,11 @@
+2007-07-01  Ævar Arnfjörð Bjarmason  <avar@cpan.org> (0.04)
+
+	* Makefile.PL: More requires, smokers were failing with missing deps
+	* plugin/rbeval.pm: new eval plugin for ruby
+	* plugin/pyeval.pm: new eval plugin for python
+	* lib/Bot/BB2.pm: some evil hack to IDENTIFY to freenode
+	* LOTS OF OTHER CHANGES ZOMG
+	
 2007-06-23  Ævar Arnfjörð Bjarmason  <avar@cpan.org> (0.03)
 
 	* Makefile.PL: Tell CPAN not to index the deps, ext, plugins and

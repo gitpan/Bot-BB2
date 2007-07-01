@@ -64,7 +64,7 @@ if ($init) {
     }
 
     # Make directories
-    mkdir $_ or die $! for qw(heaps jail);
+    mkdir $_ for qw(heaps jail);
 
     unless ($configured->()) {
         die "panic: failed to set up @conf during --init";

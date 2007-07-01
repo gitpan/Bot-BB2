@@ -7,7 +7,7 @@ author 'BUU';
 abstract 'ALL ABOARD THE BUUTRAIN';
 
 license 'perl';
-version '0.03';
+version '0.04';
 
 no_index directory => $_ for qw(deps ext plugins daemons);
 
@@ -34,9 +34,13 @@ requires 'Time::HiRes' => 0;
 requires 'Text::Wrap' => 0;
 requires 'strict' => 0;
 requires 'Log::Log4perl' => 0;
+requires 'File::Copy::Recursive' => 0;
 
 ## BB2/ConfigParser.pm
 requires 'Config::General' => 0;
+
+## BB2/CommandParser.pm
+requires 'Parse::RecDescent' => 0;
 
 ## BB2/TiedPluginHandle.pm
 requires 'Data::Dumper' => 0;

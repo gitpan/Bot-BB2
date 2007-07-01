@@ -14,7 +14,7 @@ use strict;
 		my $stderr;
 
 		my $input_subref = sub { 
-			my $code = "no strict; no warnings; ";
+			my $code = "no strict; no warnings; package main; ";
 			$code .= "@args";
 			my $ret = eval $code;
 

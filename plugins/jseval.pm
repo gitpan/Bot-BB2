@@ -45,6 +45,16 @@ warn "JS EVALER ACTIVATE\n";
 
 		warn "JSEVAL: $code\n";
 		
-		wheel_execute(sub { $evaler->($code) }, sub { my ($out, $err) = @_; print $out });
+		wheel_execute(sub { $evaler->($code) }, 
+			sub {
+				my ($out, $err) = @_;
+#        if( $err ) {
+#          print "ERROR: ", substr($err, 0, 250);
+#        }
+#        else {
+					print substr($out,0,250);
+#        }
+			}
+		);
 	}
 }

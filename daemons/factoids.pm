@@ -121,9 +121,16 @@ sub msg
 		my $factoid = query_factoid( $body );
 		if( $factoid and %$factoid )
 		{
-		#TODO literal, <reply> and alternation
+			#TODO {action}
 			my $reply;
-			$reply .= "$factoid->{subject} $factoid->{copula} $factoid->{predicate}";
+			my $alt_sep = "=OR=";
+			if( $factoid->{predicate} =~ /$alt_sep/ )
+			{
+				my @alts = split /$alt_sep/, $factoid->{predicate};
+				$factoid->{predicate} = $alts[rand@alts];
+			}
+			$reply .= "$factoid->{subject} $factoid->{copula} " if not $factoid->{predicate} =~ s/^\s*{reply}//;
+			$reply .= $factoid->{predicate};
 			warn "Found factoid, sending: $reply";
 			if( length $factoid->{predicate} and $factoid->{predicate} =~ /\S/ )
 			{

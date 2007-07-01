@@ -5,7 +5,7 @@ use Net::Dict;
 		my $dict = Net::Dict->new("dict.org");
 		
 		my $out;
-		for( @args )
+		for( map { split /\s+/ } @args )
 		{
 			my $words = $dict->define( $_, 'moby-thes' );
 			$words = $words->[0]->[1];

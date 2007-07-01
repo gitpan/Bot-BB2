@@ -4,7 +4,7 @@ author: BUU
 build_requires: 
   Test::More: 0
 distribution_type: module
-generated_by: Module::Install version 0.65
+generated_by: Module::Install version 0.650
 license: perl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -33,6 +33,7 @@ requires:
   Config::General: 0
   DB_File: 0
   Data::Dumper: 0
+  File::Copy::Recursive: 0
   IPC::Shareable: 0
   Log::Dispatch: 0
   Log::Log4perl: 0
@@ -42,6 +43,7 @@ requires:
   POE::Filter::Reference: 0
   POE::Session: 0
   POE::Wheel::Run: 0
+  Parse::RecDescent: 0
   Scalar::Util: 0
   Symbol: 0
   Text::ParseWords: 0
@@ -49,4 +51,4 @@ requires:
   Time::HiRes: 0
   strict: 0
 tests: t/*.t
-version: 0.03
+version: 0.04
