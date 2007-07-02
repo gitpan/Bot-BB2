@@ -7,7 +7,7 @@ author 'BUU';
 abstract 'ALL ABOARD THE BUUTRAIN';
 
 license 'perl';
-version '0.04';
+version '0.05';
 
 no_index directory => $_ for qw(deps ext plugins daemons);
 
@@ -35,6 +35,7 @@ requires 'Text::Wrap' => 0;
 requires 'strict' => 0;
 requires 'Log::Log4perl' => 0;
 requires 'File::Copy::Recursive' => 0;
+requires 'Text::Glob' => 0;
 
 ## BB2/ConfigParser.pm
 requires 'Config::General' => 0;

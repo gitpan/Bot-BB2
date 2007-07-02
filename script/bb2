@@ -10,6 +10,12 @@ use Getopt::Long ();
 use Bot::BB2::ConfigParser ();
 
 #
+# Set up signals
+#
+
+$SIG{INT} = sub { exit };
+
+#
 # Get our options
 #
 
@@ -123,8 +129,6 @@ bb2 - L<Bot::BB2> CLI interface
 =head1 OPTIONS
 
 =over
-
-
 
 =item --init
 
